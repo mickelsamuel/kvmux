@@ -1,0 +1,29 @@
+# Build output
+/build/
+/build-*/
+/out/
+cmake-build-*/
+
+# Dependencies fetched by CMake
+/_deps/
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+compile_commands.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Bench artifacts (raw results are committed deliberately, not auto)
+*.tmp
+*.log
+!bench/results/**/*.log
+
+# OS
+.DS_Store
+Thumbs.db

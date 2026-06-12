@@ -1,0 +1,9 @@
+# Normalize line endings to LF in the repo for all text/source files.
+# This keeps clang-format (which runs on Linux CI) byte-consistent with the
+# working tree regardless of the checkout platform.
+* text=auto eol=lf
+
+*.png binary
+*.gguf binary
+*.zst binary
+*.gz binary

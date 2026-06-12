@@ -1,0 +1,76 @@
+name: ci
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    name: build+test (${{ matrix.name }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: gcc-13
+            cc: gcc-13
+            cxx: g++-13
+            cmake_args: ""
+          - name: clang-18
+            cc: clang-18
+            cxx: clang++-18
+            cmake_args: ""
+          - name: asan-ubsan
+            cc: clang-18
+            cxx: clang++-18
+            cmake_args: "-DKVMUX_ASAN=ON"
+          - name: tsan
+            cc: clang-18
+            cxx: clang++-18
+            cmake_args: "-DKVMUX_TSAN=ON"
+    env:
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install toolchain and Boost
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            ninja-build cmake g++-13 clang-18 libboost-all-dev
+
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo ${{ matrix.cmake_args }}
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        env:
+          # ASan/UBSan: fail the job on any sanitizer report.
+          ASAN_OPTIONS: halt_on_error=1:abort_on_error=1:detect_leaks=1
+          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+          TSAN_OPTIONS: halt_on_error=1
+        run: ctest --test-dir build --output-on-failure
+
+  format-check:
+    name: clang-format
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install clang-format-18
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang-format-18
+      - name: Check formatting
+        run: |
+          files=$(find src tests -type f \( -name '*.cpp' -o -name '*.hpp' \))
+          echo "Checking:"; echo "$files"
+          clang-format-18 --dry-run --Werror $files
