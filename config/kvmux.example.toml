@@ -1,0 +1,44 @@
+# kvmux example configuration — the complete v1 surface.
+# Anything not present here is, by design, not configurable in v1.
+
+[server]
+listen = "0.0.0.0"
+port = 8080
+max_concurrent_streams = 256   # global admission ceiling
+queue_depth = 64               # bounded FIFO wait-queue when at capacity
+queue_timeout_ms = 5000        # queued request waits at most this long -> 429
+request_timeout_ms = 300000    # upstream request budget (streaming path)
+
+[metrics]
+port = 9090                    # Prometheus text exposition on /metrics
+
+[routing]
+policy = "prefix_affinity"     # "prefix_affinity" | "round_robin"
+prefix_bytes = 1024            # bytes of the canonical request used for the affinity key
+load_threshold = 0.8           # spill to the next HRW candidate at this load fraction
+
+# One [[backends]] block per upstream. `type` selects the backend quirk module.
+# `models` lists the model ids this backend serves; for vLLM these must be the
+# exact --served-model-name (vLLM 404s on a mismatch).
+
+[[backends]]
+name = "vllm-a"
+type = "vllm"
+base_url = "http://127.0.0.1:8001"
+models = ["Qwen/Qwen2.5-3B-Instruct"]
+max_in_flight = 64
+health_interval_ms = 2000
+
+[[backends]]
+name = "llama-1"
+type = "llamacpp"
+base_url = "http://127.0.0.1:8002"
+models = ["qwen2.5-3b-q4"]
+max_in_flight = 8
+
+[[backends]]
+name = "ollama"
+type = "ollama"
+base_url = "http://127.0.0.1:11434"
+models = ["llama3.2:3b"]
+max_in_flight = 8
