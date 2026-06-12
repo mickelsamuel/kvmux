@@ -11,7 +11,9 @@ namespace {
 ProbeResult conn(int status, std::string body = "") {
     return ProbeResult{true, status, std::move(body)};
 }
-ProbeResult unreachable() { return ProbeResult{false, 0, ""}; }
+ProbeResult unreachable() {
+    return ProbeResult{false, 0, ""};
+}
 } // namespace
 
 // --- vLLM / llama.cpp /health (status-code-only) ----------------------------

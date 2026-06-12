@@ -38,7 +38,7 @@ void CircuitBreaker::on_success(bool is_probe) {
     // Any success closes the breaker and clears the failure run. (A success from
     // the probe is the canonical close; a success that races in while CLOSED
     // simply keeps it closed.)
-    (void)is_probe;
+    (void) is_probe;
     state_ = BreakerState::Closed;
     consecutive_failures_ = 0;
 }

@@ -77,7 +77,11 @@ TEST_CASE("admission: queue-full request is rejected (429 path)", "[admission]")
 
     // A waiter that occupies the single queue slot (and never gets served).
     asio::co_spawn(
-        ioc, [&]() -> asio::awaitable<void> { (void)co_await gate.acquire(); co_return; },
+        ioc,
+        [&]() -> asio::awaitable<void> {
+            (void) co_await gate.acquire();
+            co_return;
+        },
         asio::detached);
 
     asio::co_spawn(

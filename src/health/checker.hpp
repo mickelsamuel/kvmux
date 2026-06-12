@@ -63,8 +63,8 @@ HealthState evaluate_ollama(const ProbeResult& liveness, const ProbeResult& read
 // when stop() is called (used by graceful shutdown / teardown).
 class HealthMonitor {
   public:
-    HealthMonitor(boost::asio::io_context& ioc, config::BackendType type,
-                  upstream::Client& client, std::chrono::milliseconds interval);
+    HealthMonitor(boost::asio::io_context& ioc, config::BackendType type, upstream::Client& client,
+                  std::chrono::milliseconds interval);
 
     HealthMonitor(const HealthMonitor&) = delete;
     HealthMonitor& operator=(const HealthMonitor&) = delete;

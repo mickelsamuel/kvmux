@@ -145,7 +145,8 @@ class MockBackend {
                 http::response<http::string_body> res{http::status::service_unavailable,
                                                       req.version()};
                 res.set(http::field::content_type, "application/json");
-                res.body() = R"({"error":{"message":"overloaded","type":"upstream_error","code":503}})";
+                res.body() =
+                    R"({"error":{"message":"overloaded","type":"upstream_error","code":503}})";
                 res.prepare_payload();
                 co_await http::async_write(stream, res, asio::use_awaitable);
                 co_return;
@@ -158,9 +159,8 @@ class MockBackend {
                 ~OpenGuard() { c.fetch_sub(1); }
             } open_guard{open_};
             json body = json::parse(req.body(), nullptr, false);
-            std::string model = body.is_object() && body.contains("model")
-                                    ? body["model"].get<std::string>()
-                                    : "m";
+            std::string model =
+                body.is_object() && body.contains("model") ? body["model"].get<std::string>() : "m";
 
             http::response<http::empty_body> res{http::status::ok, req.version()};
             res.set(http::field::content_type, "text/event-stream");
@@ -183,7 +183,8 @@ class MockBackend {
                     t.expires_after(5ms);
                     co_await t.async_wait(asio::use_awaitable);
                 }
-                co_await send(chunk(R"({"choices":[{"index":0,"delta":{},"finish_reason":"stop"}]})"));
+                co_await send(
+                    chunk(R"({"choices":[{"index":0,"delta":{},"finish_reason":"stop"}]})"));
                 co_await send("data: [DONE]\n\n");
                 co_await asio::async_write(stream, http::make_chunk_last(), asio::use_awaitable);
                 beast::error_code ec;
@@ -193,8 +194,9 @@ class MockBackend {
             // Tag the content with our port so the test can tell which backend
             // actually served the request.
             const std::string tag = "from:" + std::to_string(port_);
-            co_await send(chunk(R"({"choices":[{"index":0,"delta":{"role":"assistant","content":")" +
-                                tag + R"("},"finish_reason":null}]})"));
+            co_await send(
+                chunk(R"({"choices":[{"index":0,"delta":{"role":"assistant","content":")" + tag +
+                      R"("},"finish_reason":null}]})"));
             co_await send(chunk(R"({"choices":[{"index":0,"delta":{},"finish_reason":"stop"}]})"));
             co_await send("data: [DONE]\n\n");
             co_await asio::async_write(stream, http::make_chunk_last(), asio::use_awaitable);
@@ -357,7 +359,7 @@ TEST_CASE("m3: failover — a dead backend's request retries on the survivor (ze
             ++ok;
         }
     }
-    CHECK(ok == 8);          // all requests served by the survivor
+    CHECK(ok == 8); // all requests served by the survivor
     CHECK(b.served_chats() == 8);
 }
 
@@ -408,8 +410,8 @@ TEST_CASE("m3: live health monitor probes each backend type correctly", "[m3][he
     // quirk modules over a real socket.
     MockBackend mb;
     asio::io_context ioc;
-    kvmux::upstream::Client client(ioc, kvmux::upstream::Target::parse(
-                                            "http://127.0.0.1:" + std::to_string(mb.port())));
+    kvmux::upstream::Client client(
+        ioc, kvmux::upstream::Target::parse("http://127.0.0.1:" + std::to_string(mb.port())));
 
     auto probe = [&](config::BackendType type) -> kvmux::health::HealthState {
         kvmux::health::HealthMonitor mon(ioc, type, client, 2000ms);
@@ -471,8 +473,7 @@ TEST_CASE("m3: admission queue overflow returns 429 with Retry-After", "[m3][adm
     holder.join();
 }
 
-TEST_CASE("m3: 100-concurrent-stream soak across 3 backends is clean (TSan target)",
-          "[m3][soak]") {
+TEST_CASE("m3: 100-concurrent-stream soak across 3 backends is clean (TSan target)", "[m3][soak]") {
     // The plan's M3 acceptance soak: 100 concurrent streams against 3 mock
     // backends through the gateway. Exercises admission, round-robin spread,
     // per-backend limiters, breakers, and the streaming path concurrently —

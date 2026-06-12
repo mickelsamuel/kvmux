@@ -3,7 +3,7 @@
 namespace kvmux::routing {
 
 RouteOrder RoundRobin::order(const RouteRequest& req, const std::vector<Candidate>& candidates) {
-    (void)req; // round-robin ignores the affinity key
+    (void) req; // round-robin ignores the affinity key
     RouteOrder out;
     const std::size_t n = candidates.size();
     if (n == 0) {

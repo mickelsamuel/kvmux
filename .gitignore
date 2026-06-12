@@ -28,3 +28,5 @@ venv/
 .DS_Store
 Thumbs.db
 .kvmux_build.sh
+.install_promtool.sh
+.fmt.sh
