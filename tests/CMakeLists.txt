@@ -11,6 +11,11 @@ include(Catch)
 
 add_executable(kvmux_tests
     unit/test_smoke.cpp
+    unit/test_config.cpp
+    unit/test_openai_types.cpp
+    unit/test_errors.cpp
+    unit/test_sse_parser.cpp
+    unit/test_sse_fixtures.cpp
 )
 
 target_link_libraries(kvmux_tests
