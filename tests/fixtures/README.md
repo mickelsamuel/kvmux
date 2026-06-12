@@ -15,13 +15,21 @@ real backend wire output.
 
 ## Why the vLLM fixture is synthetic
 
-vLLM is CUDA/Linux-first and its Blackwell (sm_120) wheel support is the open
-uncertainty U4/Q5 in the research findings. A real capture was not produced in
-the M1 session; the install attempt is logged in `04_BUILD/M1-log.md` and the
-real-vLLM-capture task is carried to **M6** (bare-metal Ubuntu env). Until then
-this synthetic fixture mirrors the documented vLLM chunk shape: OpenAI
-`chat.completion.chunk` SSE frames, a `finish_reason:"stop"` chunk, the trailing
-empty-`choices` usage chunk from `include_usage`, and the `[DONE]` sentinel.
+A real capture was not produced in the M1 session; the real-vLLM-capture task is
+carried to **M6** (bare-metal Ubuntu env). The synthetic fixture mirrors the
+documented vLLM v0.22.1 chunk shape: OpenAI `chat.completion.chunk` SSE frames, a
+`finish_reason:"stop"` chunk, the trailing empty-`choices` usage chunk from
+`include_usage`, and the `[DONE]` sentinel.
+
+Important nuance for the open uncertainty U4/Q5 (Blackwell sm_120 support):
+**the sm_120 wheels install cleanly and the model loads on the RTX 5070 Ti under
+WSL2** — `vllm 0.22.1` + `torch 2.11.0+cu130`, `torch.cuda.get_device_capability()
+== (12, 0)`, FLASH_ATTN backend selected, model weights loaded. The blocker is NOT
+Blackwell: vLLM's KV-cache memory-probe path uses FlashInfer, which JIT-compiles a
+kernel and needs `nvcc` (`cuda_home=/usr/local/cuda`) — the CUDA toolkit isn't
+installed in this WSL2 dev box. Installing the toolkit (or a non-JIT path) is an
+environment-provisioning task that belongs to the M6 bench env. See
+`04_BUILD/M1-log.md` / `M2-log.md` for the exact error and commands.
 
 ## Observed real-backend quirks captured here
 

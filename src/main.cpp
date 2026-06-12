@@ -1,90 +1,40 @@
 // kvmux — single-binary OpenAI-compatible LLM gateway.
 //
-// M0 skeleton: a Boost.Beast + Boost.Asio C++20-coroutine HTTP server that
-// responds on a couple of routes, proving the toolchain (GCC 13 / Clang 18,
-// Boost >= 1.83, C++20 coroutines) end-to-end. The streaming proxy spine lands
-// in M2 and replaces this handler.
+// M2: the streaming proxy spine. A Boost.Beast/Asio C++20-coroutine server
+// fronts a configured backend, re-streaming SSE token-by-token with per-frame
+// flush, injecting stream_options.include_usage upstream and forwarding the
+// trailing usage chunk and [DONE]. SIGTERM triggers a graceful drain: new
+// requests get 503 while in-flight streams finish.
 
 #include "config.hpp"
+#include "server/gateway.hpp"
+#include "server/listener.hpp"
 
-#include <boost/asio/awaitable.hpp>
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/detached.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/signal_set.hpp>
-#include <boost/asio/use_awaitable.hpp>
-#include <boost/beast/core.hpp>
-#include <boost/beast/http.hpp>
-#include <boost/beast/version.hpp>
+#include <boost/asio/steady_timer.hpp>
+#include <chrono>
 #include <cstdlib>
+#include <functional>
 #include <iostream>
+#include <memory>
 #include <string>
 
 namespace asio = boost::asio;
-namespace beast = boost::beast;
-namespace http = boost::beast::http;
 using tcp = boost::asio::ip::tcp;
+using namespace std::chrono_literals;
 
 namespace {
-
 constexpr const char* kVersion = "0.1.0";
 
-http::response<http::string_body> make_response(const http::request<http::string_body>& req) {
-    auto build = [&](http::status status, const std::string& ctype, std::string body) {
-        http::response<http::string_body> res{status, req.version()};
-        res.set(http::field::server, std::string("kvmux/") + kVersion);
-        res.set(http::field::content_type, ctype);
-        res.keep_alive(req.keep_alive());
-        res.body() = std::move(body);
-        res.prepare_payload();
-        return res;
-    };
-
-    if (req.target() == "/healthz") {
-        return build(http::status::ok, "application/json", R"({"status":"ok"})");
-    }
-    if (req.target() == "/") {
-        return build(http::status::ok, "text/plain",
-                     std::string("kvmux ") + kVersion + " — building in public\n");
-    }
-    return build(http::status::not_found, "application/json",
-                 R"({"error":{"message":"not found","type":"not_found_error","code":404}})");
+void print_usage() {
+    std::cout << "kvmux " << kVersion << "\n"
+              << "usage: kvmux --config <path.toml>\n"
+              << "       kvmux --version\n";
 }
-
-asio::awaitable<void> handle_session(tcp::socket socket) {
-    beast::tcp_stream stream(std::move(socket));
-    beast::flat_buffer buffer;
-    try {
-        for (;;) {
-            stream.expires_after(std::chrono::seconds(30));
-            http::request<http::string_body> req;
-            co_await http::async_read(stream, buffer, req, asio::use_awaitable);
-
-            auto res = make_response(req);
-            bool keep_alive = res.keep_alive();
-            co_await http::async_write(stream, res, asio::use_awaitable);
-            if (!keep_alive) {
-                break;
-            }
-        }
-    } catch (const std::exception&) {
-        // Connection closed / read error — end the session quietly.
-    }
-    beast::error_code ec;
-    stream.socket().shutdown(tcp::socket::shutdown_send, ec);
-}
-
-asio::awaitable<void> listen(tcp::endpoint endpoint) {
-    auto executor = co_await asio::this_coro::executor;
-    tcp::acceptor acceptor(executor, endpoint);
-    std::cout << "kvmux " << kVersion << " listening on " << endpoint << std::endl;
-    for (;;) {
-        auto socket = co_await acceptor.async_accept(asio::use_awaitable);
-        asio::co_spawn(executor, handle_session(std::move(socket)), asio::detached);
-    }
-}
-
 } // namespace
 
 int main(int argc, char** argv) {
@@ -96,31 +46,38 @@ int main(int argc, char** argv) {
         } else if (arg == "--version") {
             std::cout << "kvmux " << kVersion << "\n";
             return 0;
+        } else if (arg == "--help" || arg == "-h") {
+            print_usage();
+            return 0;
         }
     }
 
-    kvmux::config::ServerConfig server;
-    if (!config_path.empty()) {
-        try {
-            auto cfg = kvmux::config::load_file(config_path);
-            server = cfg.server;
-            std::cout << "loaded config: " << config_path << " (" << cfg.backends.size()
-                      << " backend(s), policy=" << kvmux::config::to_string(cfg.routing.policy)
-                      << ")" << std::endl;
-        } catch (const kvmux::config::ConfigError& e) {
-            std::cerr << "config error: " << e.what() << std::endl;
-            return 2;
-        }
+    if (config_path.empty()) {
+        std::cerr << "error: --config <path.toml> is required\n";
+        print_usage();
+        return 2;
     }
+
+    kvmux::config::Config cfg;
+    try {
+        cfg = kvmux::config::load_file(config_path);
+    } catch (const kvmux::config::ConfigError& e) {
+        std::cerr << "config error: " << e.what() << std::endl;
+        return 2;
+    }
+
+    std::cout << "kvmux " << kVersion << " — loaded " << config_path << " (" << cfg.backends.size()
+              << " backend(s), policy=" << kvmux::config::to_string(cfg.routing.policy) << ")"
+              << std::endl;
 
     try {
         asio::io_context ioc(1);
-        asio::signal_set signals(ioc, SIGINT, SIGTERM);
-        signals.async_wait([&](const boost::system::error_code&, int) { ioc.stop(); });
+        kvmux::server::Gateway gateway(ioc, cfg);
 
-        auto address = asio::ip::make_address(server.listen);
-        asio::co_spawn(ioc,
-                       listen(tcp::endpoint(address, static_cast<unsigned short>(server.port))),
+        auto address = asio::ip::make_address(cfg.server.listen);
+        tcp::endpoint endpoint(address, static_cast<unsigned short>(cfg.server.port));
+
+        asio::co_spawn(ioc, kvmux::server::run_listener(endpoint, gateway),
                        [](std::exception_ptr e) {
                            if (e) {
                                try {
@@ -130,6 +87,39 @@ int main(int argc, char** argv) {
                                }
                            }
                        });
+
+        // Graceful drain on SIGINT/SIGTERM: flip the gateway to draining (new
+        // requests -> 503), give in-flight streams a bounded window to finish,
+        // then stop the io_context.
+        asio::signal_set signals(ioc, SIGINT, SIGTERM);
+        signals.async_wait([&](const boost::system::error_code&, int sig) {
+            std::cout << "\nreceived signal " << sig << "; draining..." << std::endl;
+            gateway.begin_drain();
+
+            // Poll for in-flight to reach zero, up to a 30s cap, then stop. The
+            // poller keeps itself alive via shared_ptr so it survives past this
+            // handler's return.
+            struct Drainer : std::enable_shared_from_this<Drainer> {
+                asio::io_context& ioc;
+                kvmux::server::Gateway& gw;
+                asio::steady_timer timer;
+                std::chrono::steady_clock::time_point deadline;
+                Drainer(asio::io_context& i, kvmux::server::Gateway& g)
+                    : ioc(i), gw(g), timer(i), deadline(std::chrono::steady_clock::now() + 30s) {}
+                void poll() {
+                    if (gw.in_flight() == 0 || std::chrono::steady_clock::now() >= deadline) {
+                        std::cout << "drain complete (in_flight=" << gw.in_flight() << ")"
+                                  << std::endl;
+                        ioc.stop();
+                        return;
+                    }
+                    timer.expires_after(100ms);
+                    auto self = shared_from_this();
+                    timer.async_wait([self](const boost::system::error_code&) { self->poll(); });
+                }
+            };
+            std::make_shared<Drainer>(ioc, gateway)->poll();
+        });
 
         ioc.run();
     } catch (const std::exception& e) {

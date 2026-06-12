@@ -1,0 +1,17 @@
+# Integration test config: kvmux -> mock backend.
+[server]
+listen = "127.0.0.1"
+port = 18080
+
+[metrics]
+port = 19090
+
+[routing]
+policy = "round_robin"
+
+[[backends]]
+name = "mock"
+type = "vllm"
+base_url = "http://127.0.0.1:19000"
+models = ["mock-model"]
+max_in_flight = 16

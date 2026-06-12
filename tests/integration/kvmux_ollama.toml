@@ -1,0 +1,17 @@
+# Integration/demo config: kvmux -> real Ollama (/v1 SSE layer).
+[server]
+listen = "127.0.0.1"
+port = 18081
+
+[metrics]
+port = 19091
+
+[routing]
+policy = "round_robin"
+
+[[backends]]
+name = "ollama"
+type = "ollama"
+base_url = "http://127.0.0.1:11434"
+models = ["llama3.2:1b"]
+max_in_flight = 8
