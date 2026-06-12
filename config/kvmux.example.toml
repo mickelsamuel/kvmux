@@ -20,6 +20,10 @@ load_threshold = 0.8           # spill to the next HRW candidate at this load fr
 # One [[backends]] block per upstream. `type` selects the backend quirk module.
 # `models` lists the model ids this backend serves; for vLLM these must be the
 # exact --served-model-name (vLLM 404s on a mismatch).
+#
+# Circuit breaker (optional, per backend): failure_threshold consecutive request
+# failures open the breaker for open_ms, after which a single half-open probe is
+# admitted. Defaults: failure_threshold = 5, open_ms = 10000.
 
 [[backends]]
 name = "vllm-a"
@@ -28,6 +32,8 @@ base_url = "http://127.0.0.1:8001"
 models = ["Qwen/Qwen2.5-3B-Instruct"]
 max_in_flight = 64
 health_interval_ms = 2000
+failure_threshold = 5
+open_ms = 10000
 
 [[backends]]
 name = "llama-1"

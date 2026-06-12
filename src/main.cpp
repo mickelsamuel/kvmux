@@ -73,6 +73,7 @@ int main(int argc, char** argv) {
     try {
         asio::io_context ioc(1);
         kvmux::server::Gateway gateway(ioc, cfg);
+        gateway.start_health_monitors();
 
         auto address = asio::ip::make_address(cfg.server.listen);
         tcp::endpoint endpoint(address, static_cast<unsigned short>(cfg.server.port));
@@ -95,6 +96,7 @@ int main(int argc, char** argv) {
         signals.async_wait([&](const boost::system::error_code&, int sig) {
             std::cout << "\nreceived signal " << sig << "; draining..." << std::endl;
             gateway.begin_drain();
+            gateway.stop_health_monitors();
 
             // Poll for in-flight to reach zero, up to a 30s cap, then stop. The
             // poller keeps itself alive via shared_ptr so it survives past this
