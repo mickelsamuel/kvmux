@@ -78,6 +78,10 @@ set(KVMUX_SOURCES
     src/config.cpp
     src/openai/errors.cpp
     src/upstream/sse_parser.cpp
+    src/upstream/client.cpp
+    src/server/sse_writer.cpp
+    src/server/gateway.cpp
+    src/server/listener.cpp
 )
 
 add_library(kvmux_core STATIC ${KVMUX_SOURCES})

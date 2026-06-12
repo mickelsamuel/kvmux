@@ -31,3 +31,16 @@ target_compile_definitions(kvmux_tests PRIVATE
     KVMUX_FIXTURE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/fixtures")
 
 catch_discover_tests(kvmux_tests)
+
+# Integration tests: in-process mock upstream + real Gateway, driven over real
+# sockets. Hermetic (no Python/network deps), so they run in CI under ASan/TSan.
+add_executable(kvmux_integration_tests
+    integration/test_proxy.cpp
+)
+target_link_libraries(kvmux_integration_tests
+    PRIVATE
+        kvmux_core
+        kvmux_warnings
+        kvmux_sanitizers
+        Catch2::Catch2WithMain)
+catch_discover_tests(kvmux_integration_tests)
