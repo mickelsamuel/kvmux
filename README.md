@@ -1,5 +1,7 @@
 # kvmux
 
+[![ci](https://github.com/mickelsamuel/kvmux/actions/workflows/ci.yml/badge.svg)](https://github.com/mickelsamuel/kvmux/actions/workflows/ci.yml)
+
 **A single-binary, OpenAI-compatible LLM gateway in C++20.** *(Building in public — status below.)*
 
 When you self-host inference, you rarely run one engine. A typical setup mixes a
