@@ -16,6 +16,10 @@ add_executable(kvmux_tests
     unit/test_errors.cpp
     unit/test_sse_parser.cpp
     unit/test_sse_fixtures.cpp
+    unit/test_circuit_breaker.cpp
+    unit/test_health.cpp
+    unit/test_admission.cpp
+    unit/test_round_robin.cpp
 )
 
 target_link_libraries(kvmux_tests
@@ -36,6 +40,7 @@ catch_discover_tests(kvmux_tests)
 # sockets. Hermetic (no Python/network deps), so they run in CI under ASan/TSan.
 add_executable(kvmux_integration_tests
     integration/test_proxy.cpp
+    integration/test_multibackend.cpp
 )
 target_link_libraries(kvmux_integration_tests
     PRIVATE

@@ -79,6 +79,10 @@ set(KVMUX_SOURCES
     src/openai/errors.cpp
     src/upstream/sse_parser.cpp
     src/upstream/client.cpp
+    src/health/checker.cpp
+    src/health/circuit_breaker.cpp
+    src/admission/controller.cpp
+    src/routing/round_robin.cpp
     src/server/sse_writer.cpp
     src/server/gateway.cpp
     src/server/listener.cpp

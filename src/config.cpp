@@ -217,9 +217,10 @@ void parse_backends(const toml::table& root, Config& cfg) {
     std::set<std::string> seen_names;
     for (const auto& elem : arr) {
         const auto& tbl = *elem.as_table();
-        reject_unknown_keys(
-            tbl, {"name", "type", "base_url", "models", "max_in_flight", "health_interval_ms"},
-            "[backends]]");
+        reject_unknown_keys(tbl,
+                            {"name", "type", "base_url", "models", "max_in_flight",
+                             "health_interval_ms", "failure_threshold", "open_ms"},
+                            "[backends]]");
 
         BackendConfig b;
         b.name = req_string(tbl, "name", "[backends]]");
@@ -249,6 +250,9 @@ void parse_backends(const toml::table& root, Config& cfg) {
         b.max_in_flight = opt_int(tbl, "max_in_flight", "[backends]]", b.max_in_flight, 1, 1000000);
         b.health_interval_ms =
             opt_int(tbl, "health_interval_ms", "[backends]]", b.health_interval_ms, 100, 3600000);
+        b.failure_threshold =
+            opt_int(tbl, "failure_threshold", "[backends]]", b.failure_threshold, 1, 1000000);
+        b.open_ms = opt_int(tbl, "open_ms", "[backends]]", b.open_ms, 1, 3600000);
 
         cfg.backends.push_back(std::move(b));
     }

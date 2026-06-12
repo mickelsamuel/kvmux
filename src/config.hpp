@@ -23,6 +23,11 @@ struct BackendConfig {
     std::vector<std::string> models;
     int max_in_flight = 8;
     int health_interval_ms = 2000;
+    // Circuit breaker, per backend. Spec: 5 consecutive request failures -> OPEN
+    // for 10 s -> half-open single probe -> close on success. Both are
+    // config-overridable per the plan's circuit-breaker spec.
+    int failure_threshold = 5;
+    int open_ms = 10000;
 };
 
 struct ServerConfig {

@@ -12,6 +12,7 @@
 //   * mid-stream abort -> SSE error event after the partial stream
 
 #include "config.hpp"
+#include "health/checker.hpp"
 #include "server/gateway.hpp"
 #include "server/listener.hpp"
 
@@ -169,6 +170,9 @@ class GatewayHarness {
         cfg.backends = {bc};
 
         gateway_ = std::make_unique<server::Gateway>(ioc_, cfg);
+        // M3 makes health a routing precondition; this harness has no real
+        // /health endpoint, so mark the single mock backend HEALTHY directly.
+        gateway_->set_health_for_test(0, kvmux::health::HealthState::Healthy);
 
         // Bind our own acceptor so we can learn the ephemeral port, then run the
         // listener loop against it via the same session logic.
