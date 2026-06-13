@@ -16,4 +16,9 @@ class Gateway;
 boost::asio::awaitable<void> run_listener(boost::asio::ip::tcp::endpoint endpoint,
                                           Gateway& gateway);
 
+// Metrics accept loop: serves the Prometheus text exposition at GET /metrics on
+// a separate endpoint (the metrics port). Everything else returns 404.
+boost::asio::awaitable<void> run_metrics_listener(boost::asio::ip::tcp::endpoint endpoint,
+                                                  Gateway& gateway);
+
 } // namespace kvmux::server

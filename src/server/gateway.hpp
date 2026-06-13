@@ -21,6 +21,8 @@
 #include "config.hpp"
 #include "health/checker.hpp"
 #include "health/circuit_breaker.hpp"
+#include "metrics/registry.hpp"
+#include "routing/prefix_affinity.hpp"
 #include "routing/round_robin.hpp"
 #include "upstream/client.hpp"
 
@@ -32,6 +34,10 @@
 #include <memory>
 #include <string>
 #include <vector>
+
+namespace kvmux::openai {
+struct ChatCompletionRequest;
+}
 
 namespace kvmux::server {
 
@@ -60,6 +66,13 @@ class Gateway {
     int in_flight() const noexcept { return in_flight_.load(); }
 
     const config::Config& cfg() const noexcept { return cfg_; }
+
+    // The metrics registry (scraped by the /metrics listener on the metrics port).
+    metrics::Registry& registry() noexcept { return registry_; }
+    const metrics::Registry& registry() const noexcept { return registry_; }
+
+    // Render the current Prometheus exposition (refreshes the live gauges first).
+    std::string render_metrics();
 
     // --- Test/diagnostic hooks ------------------------------------------------
     // Override a backend's observed health state (used by integration tests that
@@ -96,11 +109,24 @@ class Gateway {
                                             bool keep_alive, int status,
                                             const std::string& json_body);
 
+    // Order the eligible candidates by the configured policy, accumulating the
+    // affinity spill count into `spills_out`.
+    std::vector<std::size_t> order_candidates(const openai::ChatCompletionRequest& creq,
+                                              const std::vector<routing::Candidate>& candidates,
+                                              int& spills_out);
+
+    // Snapshot the admission gate's running/waiting counts into the registry.
+    // Must be called on the io_context thread (the request path) so the gate is
+    // not read from another thread.
+    void publish_admission_gauges();
+
     boost::asio::io_context& ioc_;
     config::Config cfg_;
     std::vector<std::unique_ptr<Backend>> backends_;
     std::unique_ptr<admission::GlobalGate> gate_;
     routing::RoundRobin round_robin_;
+    routing::PrefixAffinity prefix_affinity_;
+    metrics::Registry registry_;
     std::atomic<bool> draining_{false};
     std::atomic<int> in_flight_{0};
 };

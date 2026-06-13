@@ -30,3 +30,4 @@ Thumbs.db
 .kvmux_build.sh
 .install_promtool.sh
 .fmt.sh
+.metrics_check.sh

@@ -78,16 +78,25 @@ int main(int argc, char** argv) {
         auto address = asio::ip::make_address(cfg.server.listen);
         tcp::endpoint endpoint(address, static_cast<unsigned short>(cfg.server.port));
 
+        auto report_error = [](const char* what) {
+            return [what](std::exception_ptr e) {
+                if (e) {
+                    try {
+                        std::rethrow_exception(e);
+                    } catch (const std::exception& ex) {
+                        std::cerr << what << ": " << ex.what() << std::endl;
+                    }
+                }
+            };
+        };
+
         asio::co_spawn(ioc, kvmux::server::run_listener(endpoint, gateway),
-                       [](std::exception_ptr e) {
-                           if (e) {
-                               try {
-                                   std::rethrow_exception(e);
-                               } catch (const std::exception& ex) {
-                                   std::cerr << "listener error: " << ex.what() << std::endl;
-                               }
-                           }
-                       });
+                       report_error("listener error"));
+
+        // Metrics endpoint on the configured metrics port.
+        tcp::endpoint metrics_endpoint(address, static_cast<unsigned short>(cfg.metrics.port));
+        asio::co_spawn(ioc, kvmux::server::run_metrics_listener(metrics_endpoint, gateway),
+                       report_error("metrics listener error"));
 
         // Graceful drain on SIGINT/SIGTERM: flip the gateway to draining (new
         // requests -> 503), give in-flight streams a bounded window to finish,

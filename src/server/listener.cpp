@@ -77,4 +77,63 @@ asio::awaitable<void> run_listener(tcp::endpoint endpoint, Gateway& gateway) {
     }
 }
 
+namespace {
+
+// One metrics connection: answer a single GET /metrics (or 404), then close. The
+// metrics endpoint is low-rate; no keep-alive loop needed.
+asio::awaitable<void> run_metrics_session(tcp::socket socket, Gateway& gateway) {
+    beast::tcp_stream stream(std::move(socket));
+    beast::flat_buffer buffer;
+    try {
+        stream.expires_after(10s);
+        http::request<http::string_body> req;
+        co_await http::async_read(stream, buffer, req, asio::use_awaitable);
+
+        http::response<http::string_body> res;
+        res.version(req.version());
+        res.set(http::field::server, "kvmux");
+        if (req.method() == http::verb::get && req.target() == "/metrics") {
+            res.result(http::status::ok);
+            // Prometheus text exposition format, version 0.0.4.
+            res.set(http::field::content_type, "text/plain; version=0.0.4; charset=utf-8");
+            res.body() = gateway.render_metrics();
+        } else {
+            res.result(http::status::not_found);
+            res.set(http::field::content_type, "application/json");
+            res.body() = R"({"error":{"message":"not found","type":"not_found_error","code":404}})";
+        }
+        res.keep_alive(false);
+        res.prepare_payload();
+        co_await http::async_write(stream, res, asio::use_awaitable);
+    } catch (const std::exception&) {
+        // read/write error or client closed — end quietly
+    }
+    beast::error_code ec;
+    stream.socket().shutdown(tcp::socket::shutdown_send, ec);
+}
+
+} // namespace
+
+asio::awaitable<void> run_metrics_listener(tcp::endpoint endpoint, Gateway& gateway) {
+    auto executor = co_await asio::this_coro::executor;
+    tcp::acceptor acceptor(executor);
+    acceptor.open(endpoint.protocol());
+    acceptor.set_option(asio::socket_base::reuse_address(true));
+    acceptor.bind(endpoint);
+    acceptor.listen(asio::socket_base::max_listen_connections);
+
+    std::cout << "kvmux metrics on " << endpoint << "/metrics" << std::endl;
+
+    for (;;) {
+        auto [ec, socket] = co_await acceptor.async_accept(asio::as_tuple(asio::use_awaitable));
+        if (ec) {
+            if (ec == asio::error::operation_aborted) {
+                break;
+            }
+            continue;
+        }
+        asio::co_spawn(executor, run_metrics_session(std::move(socket), gateway), asio::detached);
+    }
+}
+
 } // namespace kvmux::server
