@@ -43,6 +43,17 @@ void CircuitBreaker::on_success(bool is_probe) {
     consecutive_failures_ = 0;
 }
 
+void CircuitBreaker::abort_probe(bool is_probe) {
+    std::lock_guard<std::mutex> lk(mu_);
+    if (!is_probe) {
+        return; // not the probe -> nothing to undo
+    }
+    // The half-open probe never actually exercised the backend. Re-arm OPEN so a
+    // fresh probe is admitted after the window. Do NOT touch consecutive_failures_.
+    state_ = BreakerState::Open;
+    opened_at_ = clock::now();
+}
+
 void CircuitBreaker::on_failure(bool is_probe) {
     std::lock_guard<std::mutex> lk(mu_);
     if (is_probe) {

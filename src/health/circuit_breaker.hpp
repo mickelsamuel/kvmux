@@ -47,6 +47,14 @@ class CircuitBreaker {
     void on_success(bool is_probe);
     void on_failure(bool is_probe);
 
+    // Abort an admitted probe WITHOUT recording success or failure: the request
+    // could not actually be dispatched (e.g. the backend's local in-flight slot
+    // was full), so the probe was not a real test of the backend. If this was the
+    // half-open probe, return the breaker to OPEN and restart the open window so
+    // a fresh probe is admitted later; a non-probe abort is a no-op. This must
+    // NOT reset the consecutive-failure run (a capacity skip is not a success).
+    void abort_probe(bool is_probe);
+
     // Current state (advances OPEN->time-eligible lazily for observability only;
     // does not consume the probe slot).
     BreakerState state() const;

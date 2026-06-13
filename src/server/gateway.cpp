@@ -361,17 +361,18 @@ asio::awaitable<bool> Gateway::handle_chat(beast::tcp_stream& stream,
         // Per-backend in-flight slot. Acquire the count first; the RAII holder
         // only records that we owe one release() on scope exit.
         if (!b.limiter->try_acquire()) {
-            // At capacity locally. Balance the breaker decision we took (a denied
-            // half-open probe would otherwise wedge the breaker): treat the
-            // local skip as a non-event by re-closing on a probe so the probe is
-            // not wasted on a capacity skip.
-            if (dec.is_probe) {
-                b.breaker->on_success(dec.is_probe);
-            }
+            // At capacity locally: this is not a real test of the backend. Abort
+            // the breaker decision WITHOUT counting a success (a capacity skip
+            // must not reset the failure run or close the breaker). For a probe,
+            // abort_probe re-arms OPEN so a fresh probe is admitted later.
+            b.breaker->abort_probe(dec.is_probe);
             continue;
         }
         admission::BackendSlot slot(*b.limiter); // releases the slot on scope exit
         ++attempts;
+        // This backend is the one we serve from; attribute E2E + the served
+        // backend label to it (the TerminalRecorder reads mlabels by ref).
+        mlabels.backend = bname;
 
         if (!creq.stream) {
             // ---- Non-streaming path ----
@@ -488,12 +489,16 @@ asio::awaitable<bool> Gateway::handle_chat(beast::tcp_stream& stream,
                     stream, version, keep_alive, 502,
                     error_json(ErrorKind::UpstreamFailure, "upstream connection failed"));
             }
-            // Connected, 2xx, but produced nothing: emit a minimal stream + DONE.
+            // Connected, 2xx, but produced nothing: emit a minimal but valid SSE
+            // stream — the [DONE] sentinel (so an OpenAI client's stream loop
+            // terminates cleanly) then the chunked terminator. Never close
+            // without [DONE].
             b.breaker->on_success(dec.is_probe);
             co_await writer.begin();
             header_started = true;
             final_code = 200;
             try {
+                co_await writer.write_data("[DONE]");
                 co_await writer.end();
             } catch (...) {
                 co_return false;

@@ -4,6 +4,14 @@
 #include <cmath>
 #include <sstream>
 
+// DELIBERATE NAMING CONVENTION (do not "fix"): kvmux metric names are
+// colon-prefixed (kvmux:ttft_seconds, ...) to mirror vLLM's / SGLang's de-facto
+// serving-metric naming (vllm:..., findings Q6) so kvmux drops into existing
+// GenAI dashboards. `promtool check metrics` prints a "metric names should not
+// contain ':'" advisory to stderr but exits 0 — that exit-0 is the acceptance
+// bar (see the metrics-promtool-check CTest); the advisory is an intentional
+// ecosystem trade-off, not a defect. Architect ruling E4 (2026-06-12).
+
 namespace kvmux::metrics {
 
 namespace {
