@@ -1,0 +1,24 @@
+# Minimal single-backend config for the quickstart: one Ollama instance.
+# This is the config the README's 10-minute path uses. For the full
+# configuration surface (vLLM + llama.cpp + Ollama, admission, circuit
+# breaker, all tunables), see kvmux.example.toml.
+
+[server]
+listen = "127.0.0.1"
+port = 8080
+
+[metrics]
+port = 9090
+
+[routing]
+policy = "prefix_affinity"
+
+# One Ollama backend, fronted through its OpenAI-compatible /v1/ layer.
+# `models` must list the exact model id you pull with `ollama pull` and
+# then send in the request body. Swap llama3.2:1b for any model you have.
+[[backends]]
+name = "ollama"
+type = "ollama"
+base_url = "http://127.0.0.1:11434"
+models = ["llama3.2:1b"]
+max_in_flight = 8
