@@ -1,8 +1,11 @@
 # kvmux example configuration — the complete v1 surface.
-# Anything not present here is, by design, not configurable in v1.
+# Anything not present here is, by design, not configurable in v1. Every value
+# shown here is the default unless noted; you can delete any line to take the
+# default. For the shortest working setup against a single Ollama, see
+# config/ollama-quickstart.toml. Full reference: README, "Configuration reference".
 
 [server]
-listen = "0.0.0.0"
+listen = "0.0.0.0"             # bind address for the OpenAI API
 port = 8080
 max_concurrent_streams = 256   # global admission ceiling
 queue_depth = 64               # bounded FIFO wait-queue when at capacity
@@ -30,7 +33,7 @@ name = "vllm-a"
 type = "vllm"
 base_url = "http://127.0.0.1:8001"
 models = ["Qwen/Qwen2.5-3B-Instruct"]
-max_in_flight = 64
+max_in_flight = 64             # raised above the default of 8 for a GPU backend
 health_interval_ms = 2000
 failure_threshold = 5
 open_ms = 10000

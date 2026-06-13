@@ -1,0 +1,72 @@
+kvmux streaming demo — captured terminal session
+=================================================
+Captured 2026-06-13 from a clean clone of the m7-docs branch, built and run in
+WSL2 (Ubuntu 24.04, Intel Core i9-14900KF), streaming through the gateway to a
+real local Ollama (0.30.8) serving llama3.2:1b. This is a text capture of the
+actual session; every line below is real output.
+
+Build + run (the quickstart path):
+
+  $ cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+  $ cmake --build build
+  $ ./build/kvmux --config config/ollama-quickstart.toml
+  kvmux 0.1.0 — loaded config/ollama-quickstart.toml (1 backend(s), policy=prefix_affinity)
+
+  $ curl -s http://127.0.0.1:8080/healthz
+  {"status":"ok"}
+
+  $ curl -s http://127.0.0.1:8080/v1/models
+  {"data":[{"created":0,"id":"llama3.2:1b","object":"model","owned_by":"kvmux"}],"object":"list"}
+
+Streaming chat completion (curl -N, token-by-token SSE through the gateway):
+
+$ curl -N http://127.0.0.1:8080/v1/chat/completions \
+    -H 'Content-Type: application/json' \
+    -d '{"model":"llama3.2:1b","stream":true,"max_tokens":40,
+         "messages":[{"role":"user","content":"In one sentence, what is an LLM gateway?"}]}'
+
+data: {"id":"chatcmpl-393","object":"chat.completion.chunk","created":1781311715,"model":"llama3.2:1b","system_fingerprint":"fp_ollama","choices":[{"index":0,"delta":{"role":"assistant","content":"An"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-393","object":"chat.completion.chunk","created":1781311715,"model":"llama3.2:1b","system_fingerprint":"fp_ollama","choices":[{"index":0,"delta":{"role":"assistant","content":" L"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-393","object":"chat.completion.chunk","created":1781311715,"model":"llama3.2:1b","system_fingerprint":"fp_ollama","choices":[{"index":0,"delta":{"role":"assistant","content":"LM"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-393","object":"chat.completion.chunk","created":1781311715,"model":"llama3.2:1b","system_fingerprint":"fp_ollama","choices":[{"index":0,"delta":{"role":"assistant","content":" ("},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-393","object":"chat.completion.chunk","created":1781311715,"model":"llama3.2:1b","system_fingerprint":"fp_ollama","choices":[{"index":0,"delta":{"role":"assistant","content":"Large"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-393","object":"chat.completion.chunk","created":1781311716,"model":"llama3.2:1b","system_fingerprint":"fp_ollama","choices":[{"index":0,"delta":{"role":"assistant","content":" Language"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-393","object":"chat.completion.chunk","created":1781311716,"model":"llama3.2:1b","system_fingerprint":"fp_ollama","choices":[{"index":0,"delta":{"role":"assistant","content":" Model"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-393","object":"chat.completion.chunk","created":1781311716,"model":"llama3.2:1b","system_fingerprint":"fp_ollama","choices":[{"index":0,"delta":{"role":"assistant","content":")"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-393","object":"chat.completion.chunk","created":1781311716,"model":"llama3.2:1b","system_fingerprint":"fp_ollama","choices":[{"index":0,"delta":{"role":"assistant","content":" gateway"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-393","object":"chat.completion.chunk","created":1781311716,"model":"llama3.2:1b","system_fingerprint":"fp_ollama","choices":[{"index":0,"delta":{"role":"assistant","content":" is"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-393","object":"chat.completion.chunk","created":1781311716,"model":"llama3.2:1b","system_fingerprint":"fp_ollama","choices":[{"index":0,"delta":{"role":"assistant","content":" a"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-393","object":"chat.completion.chunk","created":1781311716,"model":"llama3.2:1b","system_fingerprint":"fp_ollama","choices":[{"index":0,"delta":{"role":"assistant","content":" software"},"finish_reason":null}]}
+
+[... output continues token by token ...]
+
+data: {"id":"chatcmpl-393","object":"chat.completion.chunk","created":1781311716,"model":"llama3.2:1b","system_fingerprint":"fp_ollama","choices":[{"index":0,"delta":{"role":"assistant","content":" systems"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-393","object":"chat.completion.chunk","created":1781311716,"model":"llama3.2:1b","system_fingerprint":"fp_ollama","choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":"length"}]}
+
+data: {"id":"chatcmpl-393","object":"chat.completion.chunk","created":1781311716,"model":"llama3.2:1b","system_fingerprint":"fp_ollama","choices":[],"usage":{"prompt_tokens":36,"completion_tokens":40,"total_tokens":76}}
+
+data: [DONE]
+
+Notes:
+- Each `data: {...}` frame is flushed as it arrives — the stream renders token by
+  token, not in one block at the end.
+- The final content chunk carries finish_reason "length" (hit max_tokens=40).
+- The trailing usage chunk (prompt/completion/total tokens) is forwarded from
+  upstream because kvmux injects stream_options.include_usage on the way out.
+- The stream terminates with `data: [DONE]`, passed through verbatim.
+
+The full untruncated stream (every token chunk) is reproducible by running the
+command above; this capture elides the middle run of single-word chunks for
+readability and keeps the head, the finish chunk, the usage chunk, and [DONE].
