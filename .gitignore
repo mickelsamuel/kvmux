@@ -31,3 +31,7 @@ Thumbs.db
 .install_promtool.sh
 .fmt.sh
 .metrics_check.sh
+.perf_probe.sh
+.perf_probe2.sh
+.flamegraph.sh
+.stable.sh
