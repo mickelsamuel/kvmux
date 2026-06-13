@@ -17,8 +17,9 @@ directory and is reproducible via `bench/run_overhead.sh`.
 
 ## Gateway-overhead experiment (loadgen → kvmux → mock  vs  loadgen → mock direct)
 
-Default `bench/run_overhead.sh` sweep (rates 20/50/100/200, duration 12 s, warmup
-3 s, concurrency 128, overlap 0.0). Per-request latency, steady state.
+`bench/run_overhead.sh` sweep over the default rates (20/50/100/200), run with
+`DURATION=12 WARMUP=3` env overrides (the script's own defaults are 20 s / 5 s),
+concurrency 128, overlap 0.0. Per-request latency, steady state.
 Overhead Δ = (through-gateway) − (direct). Source CSVs: `*_rate{20,50,100,200}_20260613T002514Z.csv`.
 
 | rate (req/s) | path    | TTFT p50 | TTFT p99 | E2E p50 | E2E p99 |
@@ -64,5 +65,8 @@ logic. No egregious hotspot in kvmux code → no optimization pass taken.
 - `metrics_*.prom` — a `/metrics` scrape taken at the end of the run.
 - `flamegraph_gateway_preliminary_wsl2.svg` / `.folded` — the CPU flamegraph.
 
-Reproduce: `bench/run_overhead.sh` (overhead + CSVs + scrape). Flamegraph
-reproduction is documented in the M5 build log (perf cpu-clock sampling).
+Reproduce: `DURATION=12 WARMUP=3 bench/run_overhead.sh` to match this run's
+parameters (overhead + CSVs + scrape). A bare run uses the script's 20 s / 5 s
+defaults and collects more samples per cell, so percentiles will be comparable
+but not digit-identical. Flamegraph reproduction is documented in the M5 build
+log (perf cpu-clock sampling).

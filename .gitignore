@@ -35,3 +35,4 @@ Thumbs.db
 .perf_probe2.sh
 .flamegraph.sh
 .stable.sh
+.m7_cleanclone_verify.sh
