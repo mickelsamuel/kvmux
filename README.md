@@ -247,8 +247,11 @@ bet pays off is exactly what the headline benchmark measures.
 names are **colon-prefixed** (`kvmux:ttft_seconds`, …) on purpose: vLLM and
 SGLang ship their serving metrics with a `vllm:` / `sglang:` colon prefix, and
 matching that convention lets kvmux drop into the same GenAI dashboards.
-`promtool check metrics` prints a "metric names should not contain ':'" style
-advisory for these names but exits 0; the colon prefix is an intentional
+`promtool check metrics` flags these names with a "metric names should not
+contain ':'" advisory and exits non-zero on current versions (3.12.0 exits 3).
+The exposition is otherwise structurally valid Prometheus text — the repo's
+`metrics-promtool-check` test asserts exactly that, failing if promtool reports
+any finding beyond the colon advisory. The colon prefix is an intentional
 ecosystem trade-off, not an oversight.
 
 Histograms (OpenTelemetry GenAI / vLLM buckets, base unit seconds):
@@ -299,7 +302,10 @@ with no dropped requests at any rate. A self-measured cross-check from
 requests) gives a **~0.51 ms mean**, consistent with the external delta. Raw
 per-request CSVs, the run log, the metrics scrape, and a CPU flamegraph are under
 [`bench/results/wsl2-preliminary/`](bench/results/wsl2-preliminary/) and
-reproduce via `bench/run_overhead.sh`. Full write-up:
+reproduce via `bench/run_overhead.sh`. Reproducibility note: the committed run
+used `DURATION=12 WARMUP=3` env overrides, while the script's defaults are
+20 s / 5 s — a bare re-run collects more samples per cell, so expect
+statistically comparable deltas, not digit-identical percentiles. Full write-up:
 [`bench/results/wsl2-preliminary/RESULTS.md`](bench/results/wsl2-preliminary/RESULTS.md).
 
 **Headline benchmark (affinity vs round-robin): pending bare-metal run.** The

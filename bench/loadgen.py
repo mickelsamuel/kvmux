@@ -226,7 +226,8 @@ def pct(values, q):
     if not values:
         return float("nan")
     s = sorted(values)
-    # Nearest-rank percentile.
+    # Rounded linear-rank percentile: index = round((q/100) * (n-1)).
+    # (Not textbook nearest-rank, which would be ceil((q/100) * n) - 1.)
     k = max(0, min(len(s) - 1, int(round((q / 100.0) * (len(s) - 1)))))
     return s[k]
 
