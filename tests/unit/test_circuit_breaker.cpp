@@ -107,3 +107,38 @@ TEST_CASE("breaker: config-overridable threshold respected", "[breaker]") {
     cb.on_failure(d.is_probe);
     CHECK(cb.state() == BreakerState::Open);
 }
+
+TEST_CASE("breaker: abort_probe re-arms OPEN without counting success", "[breaker]") {
+    CircuitBreaker cb(2, 50ms);
+    for (int i = 0; i < 2; ++i) {
+        auto d = cb.allow_request();
+        cb.on_failure(d.is_probe);
+    }
+    REQUIRE(cb.state() == BreakerState::Open);
+    std::this_thread::sleep_for(70ms);
+    auto probe = cb.allow_request();
+    REQUIRE(probe.is_probe); // promoted to the half-open probe
+    // The probe could not actually run (e.g. local capacity); abort it.
+    cb.abort_probe(probe.is_probe);
+    // It must NOT have closed (a capacity skip is not a success).
+    CHECK_FALSE(cb.allow_request().allowed); // back to OPEN, window restarted
+    std::this_thread::sleep_for(70ms);
+    // After the window a fresh probe is admitted again.
+    auto probe2 = cb.allow_request();
+    CHECK(probe2.is_probe);
+}
+
+TEST_CASE("breaker: abort_probe on a non-probe is a no-op", "[breaker]") {
+    CircuitBreaker cb(5, 10s);
+    // Accumulate some failures (closed, non-probe path).
+    for (int i = 0; i < 3; ++i) {
+        auto d = cb.allow_request();
+        REQUIRE_FALSE(d.is_probe);
+        cb.on_failure(d.is_probe);
+    }
+    CHECK(cb.consecutive_failures() == 3);
+    auto d = cb.allow_request();
+    cb.abort_probe(d.is_probe);            // non-probe abort -> no state change
+    CHECK(cb.consecutive_failures() == 3); // failure run untouched
+    CHECK(cb.state() == BreakerState::Closed);
+}

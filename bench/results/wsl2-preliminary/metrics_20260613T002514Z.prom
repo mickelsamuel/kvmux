@@ -1,0 +1,109 @@
+# HELP kvmux:ttft_seconds Time to first token, seconds.
+# TYPE kvmux:ttft_seconds histogram
+kvmux:ttft_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.001"} 4002
+kvmux:ttft_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.005"} 4004
+kvmux:ttft_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.01"} 4004
+kvmux:ttft_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.02"} 4004
+kvmux:ttft_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.04"} 4004
+kvmux:ttft_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.06"} 4004
+kvmux:ttft_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.08"} 4004
+kvmux:ttft_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.1"} 4004
+kvmux:ttft_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.25"} 4004
+kvmux:ttft_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.5"} 4004
+kvmux:ttft_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.75"} 4004
+kvmux:ttft_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="1"} 4004
+kvmux:ttft_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="2.5"} 4004
+kvmux:ttft_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="5"} 4004
+kvmux:ttft_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="7.5"} 4004
+kvmux:ttft_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="10"} 4004
+kvmux:ttft_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="+Inf"} 4004
+kvmux:ttft_seconds_sum{route="chat_completions",backend="mock",model="mock-model"} 2.03055
+kvmux:ttft_seconds_count{route="chat_completions",backend="mock",model="mock-model"} 4004
+# HELP kvmux:inter_token_latency_seconds Inter-token (time-per-output-token) latency, seconds.
+# TYPE kvmux:inter_token_latency_seconds histogram
+kvmux:inter_token_latency_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.01"} 48048
+kvmux:inter_token_latency_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.025"} 48048
+kvmux:inter_token_latency_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.05"} 48048
+kvmux:inter_token_latency_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.075"} 48048
+kvmux:inter_token_latency_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.1"} 48048
+kvmux:inter_token_latency_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.15"} 48048
+kvmux:inter_token_latency_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.2"} 48048
+kvmux:inter_token_latency_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.3"} 48048
+kvmux:inter_token_latency_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.4"} 48048
+kvmux:inter_token_latency_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.5"} 48048
+kvmux:inter_token_latency_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.75"} 48048
+kvmux:inter_token_latency_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="1"} 48048
+kvmux:inter_token_latency_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="2.5"} 48048
+kvmux:inter_token_latency_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="+Inf"} 48048
+kvmux:inter_token_latency_seconds_sum{route="chat_completions",backend="mock",model="mock-model"} 0.241585
+kvmux:inter_token_latency_seconds_count{route="chat_completions",backend="mock",model="mock-model"} 48048
+# HELP kvmux:e2e_request_latency_seconds End-to-end request latency, seconds.
+# TYPE kvmux:e2e_request_latency_seconds histogram
+kvmux:e2e_request_latency_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.01"} 4004
+kvmux:e2e_request_latency_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.02"} 4004
+kvmux:e2e_request_latency_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.04"} 4004
+kvmux:e2e_request_latency_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.08"} 4004
+kvmux:e2e_request_latency_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.16"} 4004
+kvmux:e2e_request_latency_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.32"} 4004
+kvmux:e2e_request_latency_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.64"} 4004
+kvmux:e2e_request_latency_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="1.28"} 4004
+kvmux:e2e_request_latency_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="2.56"} 4004
+kvmux:e2e_request_latency_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="5.12"} 4004
+kvmux:e2e_request_latency_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="10.24"} 4004
+kvmux:e2e_request_latency_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="20.48"} 4004
+kvmux:e2e_request_latency_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="40.96"} 4004
+kvmux:e2e_request_latency_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="81.92"} 4004
+kvmux:e2e_request_latency_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="+Inf"} 4004
+kvmux:e2e_request_latency_seconds_sum{route="chat_completions",backend="mock",model="mock-model"} 2.42653
+kvmux:e2e_request_latency_seconds_count{route="chat_completions",backend="mock",model="mock-model"} 4004
+# HELP kvmux:request_queue_time_seconds Admission queue wait time, seconds.
+# TYPE kvmux:request_queue_time_seconds histogram
+kvmux:request_queue_time_seconds_bucket{route="chat_completions",backend="",model="mock-model",le="0.01"} 4004
+kvmux:request_queue_time_seconds_bucket{route="chat_completions",backend="",model="mock-model",le="0.02"} 4004
+kvmux:request_queue_time_seconds_bucket{route="chat_completions",backend="",model="mock-model",le="0.04"} 4004
+kvmux:request_queue_time_seconds_bucket{route="chat_completions",backend="",model="mock-model",le="0.08"} 4004
+kvmux:request_queue_time_seconds_bucket{route="chat_completions",backend="",model="mock-model",le="0.16"} 4004
+kvmux:request_queue_time_seconds_bucket{route="chat_completions",backend="",model="mock-model",le="0.32"} 4004
+kvmux:request_queue_time_seconds_bucket{route="chat_completions",backend="",model="mock-model",le="0.64"} 4004
+kvmux:request_queue_time_seconds_bucket{route="chat_completions",backend="",model="mock-model",le="1.28"} 4004
+kvmux:request_queue_time_seconds_bucket{route="chat_completions",backend="",model="mock-model",le="2.56"} 4004
+kvmux:request_queue_time_seconds_bucket{route="chat_completions",backend="",model="mock-model",le="5.12"} 4004
+kvmux:request_queue_time_seconds_bucket{route="chat_completions",backend="",model="mock-model",le="10.24"} 4004
+kvmux:request_queue_time_seconds_bucket{route="chat_completions",backend="",model="mock-model",le="20.48"} 4004
+kvmux:request_queue_time_seconds_bucket{route="chat_completions",backend="",model="mock-model",le="40.96"} 4004
+kvmux:request_queue_time_seconds_bucket{route="chat_completions",backend="",model="mock-model",le="81.92"} 4004
+kvmux:request_queue_time_seconds_bucket{route="chat_completions",backend="",model="mock-model",le="+Inf"} 4004
+kvmux:request_queue_time_seconds_sum{route="chat_completions",backend="",model="mock-model"} 0
+kvmux:request_queue_time_seconds_count{route="chat_completions",backend="",model="mock-model"} 4004
+# HELP kvmux:gateway_overhead_seconds Gateway self-overhead: admission to first upstream byte forwarded, seconds.
+# TYPE kvmux:gateway_overhead_seconds histogram
+kvmux:gateway_overhead_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.01"} 4004
+kvmux:gateway_overhead_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.02"} 4004
+kvmux:gateway_overhead_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.04"} 4004
+kvmux:gateway_overhead_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.08"} 4004
+kvmux:gateway_overhead_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.16"} 4004
+kvmux:gateway_overhead_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.32"} 4004
+kvmux:gateway_overhead_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="0.64"} 4004
+kvmux:gateway_overhead_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="1.28"} 4004
+kvmux:gateway_overhead_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="2.56"} 4004
+kvmux:gateway_overhead_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="5.12"} 4004
+kvmux:gateway_overhead_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="10.24"} 4004
+kvmux:gateway_overhead_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="20.48"} 4004
+kvmux:gateway_overhead_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="40.96"} 4004
+kvmux:gateway_overhead_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="81.92"} 4004
+kvmux:gateway_overhead_seconds_bucket{route="chat_completions",backend="mock",model="mock-model",le="+Inf"} 4004
+kvmux:gateway_overhead_seconds_sum{route="chat_completions",backend="mock",model="mock-model"} 2.03055
+kvmux:gateway_overhead_seconds_count{route="chat_completions",backend="mock",model="mock-model"} 4004
+# HELP kvmux:requests_running In-flight requests.
+# TYPE kvmux:requests_running gauge
+kvmux:requests_running 1
+# HELP kvmux:requests_waiting Requests waiting in the admission queue.
+# TYPE kvmux:requests_waiting gauge
+kvmux:requests_waiting 0
+# HELP kvmux:requests_total Completed requests by HTTP status code.
+# TYPE kvmux:requests_total counter
+kvmux:requests_total{code="200"} 4004
+# HELP kvmux:affinity_spills_total Prefix-affinity load-guard spill cascades.
+# TYPE kvmux:affinity_spills_total counter
+# HELP kvmux:backend_failures_total Upstream request failures.
+# TYPE kvmux:backend_failures_total counter

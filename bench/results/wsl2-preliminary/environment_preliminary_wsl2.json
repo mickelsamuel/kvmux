@@ -1,12 +1,12 @@
 {
   "label": "preliminary (WSL2)",
-  "timestamp_utc": "20260613T000732Z",
+  "timestamp_utc": "20260613T002514Z",
   "host_kernel": "Linux 6.6.87.2-microsoft-standard-WSL2 x86_64",
   "cpu_model": "Intel(R) Core(TM) i9-14900KF",
   "nproc": 12,
   "mem_total_kb": 28738752,
   "python": "Python 3.12.3",
-  "rates": "20 50 100", "duration_s": 12, "warmup_s": 3,
-  "concurrency": 128, "overlap": 0.0, "max_tokens": 16,
+  "rates": "20 50 100 200", "duration_s": 12, "warmup_s": 3,
+  "concurrency": 128, "overlap": 0.0, "max_tokens": 32,
   "mock_inter_token_delay_ms": 0
 }

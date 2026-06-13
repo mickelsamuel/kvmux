@@ -1,82 +1,102 @@
 === kvmux gateway-overhead experiment — preliminary (WSL2) ===
 {
   "label": "preliminary (WSL2)",
-  "timestamp_utc": "20260613T000732Z",
+  "timestamp_utc": "20260613T002514Z",
   "host_kernel": "Linux 6.6.87.2-microsoft-standard-WSL2 x86_64",
   "cpu_model": "Intel(R) Core(TM) i9-14900KF",
   "nproc": 12,
   "mem_total_kb": 28738752,
   "python": "Python 3.12.3",
-  "rates": "20 50 100", "duration_s": 12, "warmup_s": 3,
-  "concurrency": 128, "overlap": 0.0, "max_tokens": 16,
+  "rates": "20 50 100 200", "duration_s": 12, "warmup_s": 3,
+  "concurrency": 128, "overlap": 0.0, "max_tokens": 32,
   "mock_inter_token_delay_ms": 0
 }
 --- direct @ rate=20/s ---
 ========================================================================
 kvmux loadgen summary — direct rate=20 (preliminary WSL2)
-target=http://127.0.0.1:9711 model=mock-model rate=20.0/s concurrency=128 overlap=0.0 duration=12.0s warmup=3.0s max_tokens=16
+target=http://127.0.0.1:9711 model=mock-model rate=20.0/s concurrency=128 overlap=0.0 duration=12.0s warmup=3.0s max_tokens=32
 requests(steady)=166 ok=166 failed=0 dropped(open-loop)=0
-TTFT: n=166 p50=0.720ms p99=0.898ms p99.9=0.925ms mean=0.714ms
-ITL : n=166 p50=0.009ms p99=0.023ms p99.9=0.030ms mean=0.008ms
-E2E : n=166 p50=0.802ms p99=0.963ms p99.9=1.048ms mean=0.798ms
+TTFT: n=166 p50=0.753ms p99=1.015ms p99.9=1.199ms mean=0.755ms
+ITL : n=166 p50=0.009ms p99=0.020ms p99.9=0.032ms mean=0.008ms
+E2E : n=166 p50=0.828ms p99=1.100ms p99.9=1.299ms mean=0.835ms
 ========================================================================
-wrote per-request CSV: /home/mickel/kvmux/bench/results/wsl2-preliminary/direct_rate20_20260613T000732Z.csv
+wrote per-request CSV: /home/mickel/kvmux/bench/results/wsl2-preliminary/direct_rate20_20260613T002514Z.csv
 --- gateway @ rate=20/s ---
 ========================================================================
 kvmux loadgen summary — gateway rate=20 (preliminary WSL2)
-target=http://127.0.0.1:9712 model=mock-model rate=20.0/s concurrency=128 overlap=0.0 duration=12.0s warmup=3.0s max_tokens=16
+target=http://127.0.0.1:9712 model=mock-model rate=20.0/s concurrency=128 overlap=0.0 duration=12.0s warmup=3.0s max_tokens=32
 requests(steady)=166 ok=166 failed=0 dropped(open-loop)=0
-TTFT: n=166 p50=1.091ms p99=1.312ms p99.9=1.333ms mean=1.095ms
-ITL : n=166 p50=0.003ms p99=0.012ms p99.9=0.027ms mean=0.005ms
-E2E : n=166 p50=1.162ms p99=1.399ms p99.9=1.421ms mean=1.172ms
+TTFT: n=166 p50=1.114ms p99=1.323ms p99.9=1.382ms mean=1.110ms
+ITL : n=166 p50=0.003ms p99=0.013ms p99.9=0.034ms mean=0.005ms
+E2E : n=166 p50=1.187ms p99=1.439ms p99.9=1.481ms mean=1.189ms
 ========================================================================
-wrote per-request CSV: /home/mickel/kvmux/bench/results/wsl2-preliminary/gateway_rate20_20260613T000732Z.csv
+wrote per-request CSV: /home/mickel/kvmux/bench/results/wsl2-preliminary/gateway_rate20_20260613T002514Z.csv
 --- direct @ rate=50/s ---
 ========================================================================
 kvmux loadgen summary — direct rate=50 (preliminary WSL2)
-target=http://127.0.0.1:9711 model=mock-model rate=50.0/s concurrency=128 overlap=0.0 duration=12.0s warmup=3.0s max_tokens=16
-requests(steady)=437 ok=437 failed=0 dropped(open-loop)=0
-TTFT: n=437 p50=0.699ms p99=0.890ms p99.9=1.117ms mean=0.680ms
-ITL : n=437 p50=0.003ms p99=0.027ms p99.9=0.032ms mean=0.006ms
-E2E : n=437 p50=0.761ms p99=0.983ms p99.9=1.204ms mean=0.746ms
+target=http://127.0.0.1:9711 model=mock-model rate=50.0/s concurrency=128 overlap=0.0 duration=12.0s warmup=3.0s max_tokens=32
+requests(steady)=435 ok=435 failed=0 dropped(open-loop)=0
+TTFT: n=435 p50=0.682ms p99=0.876ms p99.9=0.891ms mean=0.664ms
+ITL : n=435 p50=0.003ms p99=0.015ms p99.9=0.029ms mean=0.006ms
+E2E : n=435 p50=0.741ms p99=0.975ms p99.9=1.022ms mean=0.727ms
 ========================================================================
-wrote per-request CSV: /home/mickel/kvmux/bench/results/wsl2-preliminary/direct_rate50_20260613T000732Z.csv
+wrote per-request CSV: /home/mickel/kvmux/bench/results/wsl2-preliminary/direct_rate50_20260613T002514Z.csv
 --- gateway @ rate=50/s ---
 ========================================================================
 kvmux loadgen summary — gateway rate=50 (preliminary WSL2)
-target=http://127.0.0.1:9712 model=mock-model rate=50.0/s concurrency=128 overlap=0.0 duration=12.0s warmup=3.0s max_tokens=16
+target=http://127.0.0.1:9712 model=mock-model rate=50.0/s concurrency=128 overlap=0.0 duration=12.0s warmup=3.0s max_tokens=32
 requests(steady)=437 ok=437 failed=0 dropped(open-loop)=0
-TTFT: n=437 p50=1.059ms p99=1.376ms p99.9=1.439ms mean=1.034ms
-ITL : n=437 p50=0.008ms p99=0.027ms p99.9=0.039ms mean=0.006ms
-E2E : n=437 p50=1.146ms p99=1.465ms p99.9=1.592ms mean=1.122ms
+TTFT: n=437 p50=1.072ms p99=1.408ms p99.9=1.515ms mean=1.059ms
+ITL : n=437 p50=0.006ms p99=0.029ms p99.9=0.034ms mean=0.006ms
+E2E : n=437 p50=1.149ms p99=1.538ms p99.9=1.606ms mean=1.142ms
 ========================================================================
-wrote per-request CSV: /home/mickel/kvmux/bench/results/wsl2-preliminary/gateway_rate50_20260613T000732Z.csv
+wrote per-request CSV: /home/mickel/kvmux/bench/results/wsl2-preliminary/gateway_rate50_20260613T002514Z.csv
 --- direct @ rate=100/s ---
 ========================================================================
 kvmux loadgen summary — direct rate=100 (preliminary WSL2)
-target=http://127.0.0.1:9711 model=mock-model rate=100.0/s concurrency=128 overlap=0.0 duration=12.0s warmup=3.0s max_tokens=16
-requests(steady)=829 ok=829 failed=0 dropped(open-loop)=0
-TTFT: n=829 p50=0.646ms p99=0.883ms p99.9=1.009ms mean=0.633ms
-ITL : n=829 p50=0.003ms p99=0.028ms p99.9=0.031ms mean=0.006ms
-E2E : n=829 p50=0.702ms p99=1.012ms p99.9=1.090ms mean=0.695ms
+target=http://127.0.0.1:9711 model=mock-model rate=100.0/s concurrency=128 overlap=0.0 duration=12.0s warmup=3.0s max_tokens=32
+requests(steady)=828 ok=828 failed=0 dropped(open-loop)=0
+TTFT: n=828 p50=0.699ms p99=0.927ms p99.9=1.061ms mean=0.681ms
+ITL : n=828 p50=0.009ms p99=0.030ms p99.9=0.032ms mean=0.007ms
+E2E : n=828 p50=0.769ms p99=1.035ms p99.9=1.208ms mean=0.759ms
 ========================================================================
-wrote per-request CSV: /home/mickel/kvmux/bench/results/wsl2-preliminary/direct_rate100_20260613T000732Z.csv
+wrote per-request CSV: /home/mickel/kvmux/bench/results/wsl2-preliminary/direct_rate100_20260613T002514Z.csv
 --- gateway @ rate=100/s ---
 ========================================================================
 kvmux loadgen summary — gateway rate=100 (preliminary WSL2)
-target=http://127.0.0.1:9712 model=mock-model rate=100.0/s concurrency=128 overlap=0.0 duration=12.0s warmup=3.0s max_tokens=16
-requests(steady)=828 ok=828 failed=0 dropped(open-loop)=0
-TTFT: n=828 p50=0.940ms p99=1.300ms p99.9=1.484ms mean=0.928ms
-ITL : n=828 p50=0.008ms p99=0.028ms p99.9=0.034ms mean=0.007ms
-E2E : n=828 p50=1.024ms p99=1.465ms p99.9=1.615ms mean=1.014ms
+target=http://127.0.0.1:9712 model=mock-model rate=100.0/s concurrency=128 overlap=0.0 duration=12.0s warmup=3.0s max_tokens=32
+requests(steady)=826 ok=826 failed=0 dropped(open-loop)=0
+TTFT: n=826 p50=0.949ms p99=1.309ms p99.9=1.465ms mean=0.940ms
+ITL : n=826 p50=0.008ms p99=0.030ms p99.9=0.034ms mean=0.007ms
+E2E : n=826 p50=1.032ms p99=1.464ms p99.9=1.564ms mean=1.028ms
 ========================================================================
-wrote per-request CSV: /home/mickel/kvmux/bench/results/wsl2-preliminary/gateway_rate100_20260613T000732Z.csv
+wrote per-request CSV: /home/mickel/kvmux/bench/results/wsl2-preliminary/gateway_rate100_20260613T002514Z.csv
+--- direct @ rate=200/s ---
+========================================================================
+kvmux loadgen summary — direct rate=200 (preliminary WSL2)
+target=http://127.0.0.1:9711 model=mock-model rate=200.0/s concurrency=128 overlap=0.0 duration=12.0s warmup=3.0s max_tokens=32
+requests(steady)=1539 ok=1539 failed=0 dropped(open-loop)=0
+TTFT: n=1539 p50=0.649ms p99=0.941ms p99.9=1.048ms mean=0.640ms
+ITL : n=1539 p50=0.009ms p99=0.031ms p99.9=0.034ms mean=0.008ms
+E2E : n=1539 p50=0.723ms p99=1.072ms p99.9=1.181ms mean=0.720ms
+========================================================================
+wrote per-request CSV: /home/mickel/kvmux/bench/results/wsl2-preliminary/direct_rate200_20260613T002514Z.csv
+--- gateway @ rate=200/s ---
+========================================================================
+kvmux loadgen summary — gateway rate=200 (preliminary WSL2)
+target=http://127.0.0.1:9712 model=mock-model rate=200.0/s concurrency=128 overlap=0.0 duration=12.0s warmup=3.0s max_tokens=32
+requests(steady)=1547 ok=1547 failed=0 dropped(open-loop)=0
+TTFT: n=1547 p50=0.873ms p99=1.327ms p99.9=1.563ms mean=0.890ms
+ITL : n=1547 p50=0.008ms p99=0.031ms p99.9=0.040ms mean=0.008ms
+E2E : n=1547 p50=0.974ms p99=1.477ms p99.9=1.676ms mean=0.990ms
+========================================================================
+wrote per-request CSV: /home/mickel/kvmux/bench/results/wsl2-preliminary/gateway_rate200_20260613T002514Z.csv
 === /metrics scrape (kvmux:gateway_overhead_seconds cross-check) ===
-kvmux:ttft_seconds_sum{route="chat_completions",backend="mock",model="mock-model"} 1.00371
-kvmux:ttft_seconds_count{route="chat_completions",backend="mock",model="mock-model"} 1925
-kvmux:e2e_request_latency_seconds_sum{route="chat_completions",backend="",model="mock-model"} 1.19362
-kvmux:e2e_request_latency_seconds_count{route="chat_completions",backend="",model="mock-model"} 1925
-kvmux:gateway_overhead_seconds_sum{route="chat_completions",backend="mock",model="mock-model"} 1.00371
-kvmux:gateway_overhead_seconds_count{route="chat_completions",backend="mock",model="mock-model"} 1925
+kvmux:ttft_seconds_sum{route="chat_completions",backend="mock",model="mock-model"} 2.03055
+kvmux:ttft_seconds_count{route="chat_completions",backend="mock",model="mock-model"} 4004
+kvmux:e2e_request_latency_seconds_sum{route="chat_completions",backend="mock",model="mock-model"} 2.42653
+kvmux:e2e_request_latency_seconds_count{route="chat_completions",backend="mock",model="mock-model"} 4004
+kvmux:gateway_overhead_seconds_sum{route="chat_completions",backend="mock",model="mock-model"} 2.03055
+kvmux:gateway_overhead_seconds_count{route="chat_completions",backend="mock",model="mock-model"} 4004
 
 All artifacts in: /home/mickel/kvmux/bench/results/wsl2-preliminary  (label: preliminary (WSL2))

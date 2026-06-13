@@ -47,7 +47,7 @@ namespace {
 // can "kill" a backend mid-run. Serves /v1/chat/completions (SSE) and /health.
 class MockBackend {
   public:
-    enum class Mode { Ok, ConnReset, Http503Stream, Health503, HealthDead, Hang };
+    enum class Mode { Ok, ConnReset, Http503Stream, Health503, HealthDead, Hang, EmptyStream };
 
     MockBackend() : acceptor_(ioc_) {
         tcp::endpoint ep(asio::ip::make_address("127.0.0.1"), 0);
@@ -185,6 +185,16 @@ class MockBackend {
                 }
                 co_await send(
                     chunk(R"({"choices":[{"index":0,"delta":{},"finish_reason":"stop"}]})"));
+                co_await send("data: [DONE]\n\n");
+                co_await asio::async_write(stream, http::make_chunk_last(), asio::use_awaitable);
+                beast::error_code ec;
+                stream.socket().shutdown(tcp::socket::shutdown_both, ec);
+                co_return;
+            }
+            if (m == Mode::EmptyStream) {
+                // 200 chunked SSE that produces ZERO content frames but a clean
+                // [DONE] (a valid empty completion). The gateway forwards [DONE]
+                // and terminates — it must never drop the sentinel.
                 co_await send("data: [DONE]\n\n");
                 co_await asio::async_write(stream, http::make_chunk_last(), asio::use_awaitable);
                 beast::error_code ec;
@@ -392,6 +402,18 @@ TEST_CASE("m3: NOT_READY backend is not eligible but a healthy one serves", "[m3
         CHECK(r.body.find("from:" + std::to_string(b.port())) != std::string::npos);
     }
     CHECK(a.served_chats() == 0); // never routed to the NOT_READY backend
+}
+
+TEST_CASE("m3: empty upstream stream still terminates with [DONE]", "[m3][failover]") {
+    // A backend that connects 200 chunked but emits zero frames must NOT leave
+    // the client hanging: the gateway emits a minimal stream ending in [DONE].
+    MockBackend a;
+    Harness h({a.port()});
+    h.mark_all_healthy();
+    a.set_mode(MockBackend::Mode::EmptyStream);
+    auto r = do_chat(h.port(), kChat);
+    CHECK(r.status == 200);
+    CHECK(r.body.find("data: [DONE]") != std::string::npos);
 }
 
 TEST_CASE("m3: no healthy backend yields 503", "[m3][health]") {
